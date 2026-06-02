@@ -1,5 +1,5 @@
 import React, { useRef, memo } from 'react';
-import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
+import Animated, { useSharedValue, useAnimatedStyle, withSpring, runOnJS } from 'react-native-reanimated';
 import {
 	Gesture,
 	GestureDetector,
@@ -7,7 +7,6 @@ import {
 	type PanGestureHandlerEventPayload
 } from 'react-native-gesture-handler';
 import { View, type AccessibilityActionEvent } from 'react-native';
-import { scheduleOnRN } from 'react-native-worklets';
 
 import Touch from '../../Touch';
 import { DeleteAction } from './Actions';
@@ -175,7 +174,7 @@ const SwipeableDeleteTouchable = ({
 			}
 		})
 		.onEnd(event => {
-			scheduleOnRN(handleRelease, event);
+			runOnJS(handleRelease)(event);
 		});
 
 	const animatedStyles = useAnimatedStyle(() => ({

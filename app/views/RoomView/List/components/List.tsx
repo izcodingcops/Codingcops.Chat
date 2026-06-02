@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import Animated, { useAnimatedScrollHandler } from 'react-native-reanimated';
-import { scheduleOnRN } from 'react-native-worklets';
+import Animated, { useAnimatedScrollHandler, runOnJS } from 'react-native-reanimated';
 
 import { useIsScreenReaderEnabled } from '../../../../lib/hooks/useIsScreenReaderEnabled';
 import { isIOS } from '../../../../lib/methods/helpers';
@@ -29,9 +28,9 @@ const List = ({ listRef, jumpToBottom, ...props }: IListProps) => {
 	const scrollHandler = useAnimatedScrollHandler({
 		onScroll: event => {
 			if (event.contentOffset.y > SCROLL_LIMIT) {
-				scheduleOnRN(setVisible, true);
+				runOnJS(setVisible)(true);
 			} else {
-				scheduleOnRN(setVisible, false);
+				runOnJS(setVisible)(false);
 			}
 		}
 	});

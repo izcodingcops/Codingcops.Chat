@@ -7,9 +7,9 @@ import Animated, {
 	useAnimatedStyle,
 	useDerivedValue,
 	useSharedValue,
-	withTiming
+	withTiming,
+	runOnJS
 } from 'react-native-reanimated';
-import { scheduleOnRN } from 'react-native-worklets';
 
 import styles from './styles';
 import { useTheme } from '../../theme';
@@ -77,7 +77,7 @@ const Seek = ({ currentTime, duration, loaded = false, onChangeTime }: ISeek) =>
 			translateX.value = clamp(newX, 0, maxWidth.value);
 		})
 		.onEnd(() => {
-			scheduleOnRN(onChangeTime, Math.round(currentTime.value * 1000));
+			runOnJS(onChangeTime)(Math.round(currentTime.value * 1000));
 		})
 		.onFinalize((_, didSucceed) => {
 			if (isPanning.value && !didSucceed) {

@@ -5,11 +5,11 @@ import Animated, {
 	interpolate,
 	withSpring,
 	useAnimatedReaction,
-	useSharedValue
+	useSharedValue,
+	runOnJS
 } from 'react-native-reanimated';
 import { RectButton } from 'react-native-gesture-handler';
 import * as Haptics from 'expo-haptics';
-import { scheduleOnRN } from 'react-native-worklets';
 
 import { CustomIcon } from '../CustomIcon';
 import { DisplayMode } from '../../lib/constants/constantDisplayMode';
@@ -85,14 +85,14 @@ export const RightActions = React.memo(({ transX, favorite, width, toggleFav, on
 			// Triggers the animation and hapticFeedback if swipe reaches/unreaches the threshold.
 			if (I18n.isRTL) {
 				if (previousTransX && currentTransX > LONG_SWIPE && previousTransX <= LONG_SWIPE) {
-					scheduleOnRN(triggerHideAnimation, ACTION_WIDTH);
+					runOnJS(triggerHideAnimation)(ACTION_WIDTH);
 				} else if (previousTransX && currentTransX <= LONG_SWIPE && previousTransX > LONG_SWIPE) {
-					scheduleOnRN(triggerHideAnimation, 0);
+					runOnJS(triggerHideAnimation)(0);
 				}
 			} else if (previousTransX && currentTransX < -LONG_SWIPE && previousTransX >= -LONG_SWIPE) {
-				scheduleOnRN(triggerHideAnimation, -ACTION_WIDTH);
+				runOnJS(triggerHideAnimation)(-ACTION_WIDTH);
 			} else if (previousTransX && currentTransX >= -LONG_SWIPE && previousTransX < -LONG_SWIPE) {
-				scheduleOnRN(triggerHideAnimation, 0);
+				runOnJS(triggerHideAnimation)(0);
 			}
 		}
 	);
