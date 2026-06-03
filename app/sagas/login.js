@@ -77,6 +77,7 @@ const showSupportedVersionsWarning = function* showSupportedVersionsWarning(serv
 
 const handleLoginRequest = function* handleLoginRequest({ credentials, logoutOnError = false, registerCustomFields }) {
 	logEvent(events.LOGIN_DEFAULT_LOGIN);
+	console.log('[login.saga] handleLoginRequest start', { resume: !!credentials.resume });
 	try {
 		let result;
 		if (credentials.resume) {
@@ -84,6 +85,7 @@ const handleLoginRequest = function* handleLoginRequest({ credentials, logoutOnE
 		} else {
 			result = yield call(loginWithPasswordCall, credentials);
 		}
+		console.log('[login.saga] handleLoginRequest got result, username:', result?.username);
 		if (!result.username) {
 			yield put(serverFinishAdd());
 			yield put(setUser(result));
@@ -122,6 +124,7 @@ const handleLoginRequest = function* handleLoginRequest({ credentials, logoutOnE
 					log(e);
 				}
 			});
+			console.log('[login.saga] dispatching loginSuccess');
 			yield put(loginSuccess(result));
 			if (registerCustomFields) {
 				const updatedUser = yield call(saveUserProfile, {}, { ...registerCustomFields });
@@ -129,6 +132,7 @@ const handleLoginRequest = function* handleLoginRequest({ credentials, logoutOnE
 			}
 		}
 	} catch (e) {
+		console.log('[login.saga] handleLoginRequest error:', e?.data?.message || e?.status || e?.message || e);
 		if (e?.data?.message && /you've been logged out by the server/i.test(e.data.message)) {
 			logEvent(events.LOGOUT_BY_SERVER);
 			yield put(logoutAction(true, 'Logged_out_by_server'));
@@ -288,6 +292,7 @@ const startVoipFork = function* startVoipFork() {
 };
 
 const handleLoginSuccess = function* handleLoginSuccess({ user }) {
+	console.log('[login.saga] handleLoginSuccess start, user:', user?.username);
 	try {
 		yield put(setUser(user));
 		setLanguage(user?.language);
@@ -299,8 +304,8 @@ const handleLoginSuccess = function* handleLoginSuccess({ user }) {
 		// On warm relaunch, redux is already populated by selectServer; on cold login, it re-checks
 		// when PERMISSIONS.SET / ENTERPRISE_MODULES.SET land.
 		yield spawn(startVoipFork);
-		yield call(fetchPermissions);
-		yield call(fetchEnterpriseModules, { user });
+		yield fork(fetchPermissions);
+		yield fork(fetchEnterpriseModules, { user });
 		yield fork(fetchCustomEmojisFork);
 		yield fork(fetchRolesFork);
 		yield fork(fetchSlashCommandsFork);
@@ -347,7 +352,9 @@ const handleLoginSuccess = function* handleLoginSuccess({ user }) {
 		UserPreferences.setString(CURRENT_SERVER, server);
 		EventEmitter.emit('connected');
 		const currentRoot = yield select(state => state.app.root);
+		console.log('[login.saga] handleLoginSuccess about to navigate, currentRoot:', currentRoot);
 		if (currentRoot !== RootEnum.ROOT_SHARE_EXTENSION && currentRoot !== RootEnum.ROOT_LOADING_SHARE_EXTENSION) {
+			console.log('[login.saga] dispatching appStart ROOT_INSIDE');
 			yield put(appStart({ root: RootEnum.ROOT_INSIDE }));
 		}
 		const inviteLinkToken = yield select(state => state.inviteLinks.token);
@@ -464,11 +471,13 @@ const root = function* root() {
 
 	while (true) {
 		const params = yield take(types.LOGIN.SUCCESS);
+		console.log('[login.saga] LOGIN.SUCCESS received, forking handleLoginSuccess');
 		const loginSuccessTask = yield fork(handleLoginSuccess, params);
-		yield race({
+		const raceResult = yield race({
 			selectRequest: take(types.SERVER.SELECT_REQUEST),
 			timeout: delay(2000)
 		});
+		console.log('[login.saga] race resolved:', raceResult.timeout ? 'TIMEOUT (2s)' : 'SERVER.SELECT_REQUEST');
 		yield cancel(loginSuccessTask);
 	}
 };

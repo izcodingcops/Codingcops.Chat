@@ -43,7 +43,6 @@ const UserForm = () => {
 	const {
 		control,
 		handleSubmit,
-		formState: { isValid },
 		getValues,
 		setFocus
 	} = useForm<ISubmit>({ mode: 'onChange', resolver: yupResolver(schema), defaultValues: { user: username || '' } });
@@ -93,9 +92,6 @@ const UserForm = () => {
 	};
 
 	const submit = ({ password, user }: ISubmit) => {
-		if (!isValid) {
-			return;
-		}
 		Keyboard.dismiss();
 		dispatch(loginRequest({ user, password }));
 	};
@@ -134,7 +130,6 @@ const UserForm = () => {
 					onPress={handleSubmit(submit)}
 					testID='login-view-submit'
 					loading={isFetching}
-					disabled={!isValid}
 				/>
 			</View>
 			<View style={styles.bottomContainer}>
