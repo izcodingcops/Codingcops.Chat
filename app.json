@@ -1,3 +1,6 @@
 {
-	"name": "RocketChatRN"
+	"name": "RocketChatRN",
+	"server": "https://chat.codingcops.com",
+	"appGroup": "group.com.codingcops.chat",
+	"appId": "6756915061"
 }

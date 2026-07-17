@@ -32,6 +32,8 @@
                         <constraints>
                             <constraint firstItem="3lX-Ut-9ad" firstAttribute="centerX" secondItem="eg9-kz-Dhh" secondAttribute="centerX" id="Fh9-Fy-1nT"/>
                             <constraint firstItem="3lX-Ut-9ad" firstAttribute="centerY" secondItem="guO-oA-Nhw" secondAttribute="centerY" id="nvB-Ic-PnI"/>
+                            <constraint firstItem="3lX-Ut-9ad" firstAttribute="width" constant="80" id="Wq1-Lm-3Rk"/>
+                            <constraint firstItem="3lX-Ut-9ad" firstAttribute="height" constant="80" id="Xp2-Kn-4Sl"/>
                         </constraints>
                     </view>
                 </viewController>
@@ -41,7 +43,7 @@
         </scene>
     </scenes>
     <resources>
-        <image name="Launch Screen Icon" width="148" height="148"/>
+        <image name="Launch Screen Icon" width="80" height="80"/>
         <namedColor name="splashBackgroundColor">
             <color red="0.96078431606292725" green="0.27058824896812439" blue="0.36078432202339172" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>

@@ -10,7 +10,7 @@ module.exports = {
 		['@babel/plugin-proposal-decorators', { legacy: true }],
 		'@babel/plugin-transform-named-capturing-groups-regex',
 		['module:react-native-dotenv'],
-		'react-native-worklets/plugin'
+		'react-native-reanimated/plugin'
 	],
 	env: {
 		production: {

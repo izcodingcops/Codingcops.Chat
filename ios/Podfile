@@ -74,6 +74,26 @@ post_install do |installer|
     end
   end
 
+  # Xcode 26's clang rejects fmt 11.0.2's consteval format-string path
+  # ("call to consteval function ... is not a constant expression"). A -D compiler
+  # flag can't fix it because base.h redefines FMT_USE_CONSTEVAL unconditionally,
+  # so patch the vendored header to force consteval off.
+  fmt_base_h = File.join(installer.sandbox.root, 'fmt', 'include', 'fmt', 'base.h')
+  fmt_marker = 'Xcode 26 consteval workaround'
+  if File.exist?(fmt_base_h)
+    fmt_contents = File.read(fmt_base_h)
+    fmt_anchor = "#endif\n#if FMT_USE_CONSTEVAL\n#  define FMT_CONSTEVAL consteval"
+    if !fmt_contents.include?(fmt_marker) && fmt_contents.include?(fmt_anchor)
+      fmt_contents.sub!(
+        fmt_anchor,
+        "#endif\n// #{fmt_marker}: force-disable fmt consteval format-string checks.\n#undef FMT_USE_CONSTEVAL\n#define FMT_USE_CONSTEVAL 0\n#if FMT_USE_CONSTEVAL\n#  define FMT_CONSTEVAL consteval"
+      )
+      File.chmod(0644, fmt_base_h) # CocoaPods marks pod headers read-only
+      File.write(fmt_base_h, fmt_contents)
+      Pod::UI.puts "[fmt] Patched base.h to disable consteval (#{fmt_marker})"
+    end
+  end
+
   bitcode_strip_path = `xcrun --find bitcode_strip`.chop!
   def strip_bitcode_from_framework(bitcode_strip_path, framework_relative_path)
     framework_path = File.join(Dir.pwd, framework_relative_path)
